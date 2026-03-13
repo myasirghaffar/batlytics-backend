@@ -13,7 +13,7 @@
     "pm2:monit": "pm2 monit",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "prepare": "husky"
+    "prepare": "husky 2>/dev/null || true"
   },
   "keywords": [],
   "author": "",
