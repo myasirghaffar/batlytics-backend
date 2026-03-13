@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     areaId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Area",
@@ -24,7 +29,8 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-productSchema.index({ name: 1, areaId: 1 });
+productSchema.index({ userId: 1 });
+productSchema.index({ userId: 1, name: 1, areaId: 1 });
 productSchema.index({ areaId: 1 });
 productSchema.index({ categoryId: 1 });
 

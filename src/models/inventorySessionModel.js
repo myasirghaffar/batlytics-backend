@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const inventorySessionSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     areaId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Area",
@@ -14,6 +19,7 @@ const inventorySessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+inventorySessionSchema.index({ userId: 1 });
 inventorySessionSchema.index({ areaId: 1 });
 inventorySessionSchema.index({ createdAt: -1 });
 

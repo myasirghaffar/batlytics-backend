@@ -29,7 +29,7 @@ router.get(
 router.post(
   "/",
   isAuthenticatedUser,
-  authorizeRole(USER_ROLES.ADMIN),
+  authorizeRole(USER_ROLES.ADMIN, USER_ROLES.USER),
   validate(createCategorySchema),
   createCategory
 );
@@ -37,7 +37,7 @@ router.post(
 router.put(
   "/:id",
   isAuthenticatedUser,
-  authorizeRole(USER_ROLES.ADMIN),
+  authorizeRole(USER_ROLES.ADMIN, USER_ROLES.USER),
   validate({
     params: categoryIdParamSchema,
     body: updateCategorySchema,
@@ -48,7 +48,7 @@ router.put(
 router.delete(
   "/:id",
   isAuthenticatedUser,
-  authorizeRole(USER_ROLES.ADMIN),
+  authorizeRole(USER_ROLES.ADMIN, USER_ROLES.USER),
   validate({ params: categoryIdParamSchema }),
   deleteCategory
 );

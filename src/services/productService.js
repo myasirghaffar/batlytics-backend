@@ -22,8 +22,8 @@ function formatProduct(p) {
   };
 }
 
-export async function listProducts(query = {}) {
-  const filter = {};
+export async function listProducts(userId, query = {}) {
+  const filter = { userId };
   if (query.areaId) filter.areaId = query.areaId;
   if (query.categoryId) filter.categoryId = query.categoryId;
 
@@ -31,9 +31,9 @@ export async function listProducts(query = {}) {
   return products.map(formatProduct);
 }
 
-export async function searchProducts(query = {}) {
+export async function searchProducts(userId, query = {}) {
   const q = (query.q || "").trim();
-  const filter = {};
+  const filter = { userId };
   if (query.areaId) filter.areaId = query.areaId;
   if (q) filter.name = { $regex: q, $options: "i" };
 
@@ -41,15 +41,17 @@ export async function searchProducts(query = {}) {
   return products.map(formatProduct);
 }
 
-export async function getProductById(id) {
-  const product = await Product.findById(id).populate("areaId", "name").lean();
+export async function getProductById(id, userId) {
+  const product = await Product.findOne({ _id: id, userId })
+    .populate("areaId", "name")
+    .lean();
   if (!product)
     throw new ErrorHandler("Product not found", HTTP_STATUS.NOT_FOUND);
   return formatProduct(product);
 }
 
-export async function createProduct(payload) {
-  const area = await Area.findById(payload.areaId);
+export async function createProduct(userId, payload) {
+  const area = await Area.findOne({ _id: payload.areaId, userId });
   if (!area)
     throw new ErrorHandler("Area not found", HTTP_STATUS.NOT_FOUND);
 
@@ -66,11 +68,11 @@ export async function createProduct(payload) {
   };
   if (payload.categoryId) data.categoryId = payload.categoryId;
 
-  const product = await Product.create(data);
+  const product = await Product.create({ ...data, userId });
   return formatProduct(product);
 }
 
-export async function updateProduct(id, payload) {
+export async function updateProduct(id, userId, payload) {
   const update = {};
   if (payload.name !== undefined) update.name = payload.name;
   if (payload.category !== undefined) update.category = payload.category;
@@ -95,18 +97,19 @@ export async function updateProduct(id, payload) {
   if (payload.fillLevel !== undefined) update.fillLevel = payload.fillLevel;
   if (payload.areaId !== undefined) update.areaId = payload.areaId;
 
-  const product = await Product.findByIdAndUpdate(id, update, {
-    new: true,
-    runValidators: true,
-  }).lean();
+  const product = await Product.findOneAndUpdate(
+    { _id: id, userId },
+    update,
+    { new: true, runValidators: true }
+  ).lean();
   if (!product)
     throw new ErrorHandler("Product not found", HTTP_STATUS.NOT_FOUND);
   return formatProduct(product);
 }
 
-export async function updateProductFillLevel(id, fillLevel) {
-  const product = await Product.findByIdAndUpdate(
-    id,
+export async function updateProductFillLevel(id, userId, fillLevel) {
+  const product = await Product.findOneAndUpdate(
+    { _id: id, userId },
     { fillLevel: Math.round(fillLevel) },
     { new: true, runValidators: true }
   ).lean();
@@ -120,9 +123,9 @@ export async function updateProductFillLevel(id, fillLevel) {
   return formatProduct(product);
 }
 
-export async function updateProductPrice(id, price) {
-  const product = await Product.findByIdAndUpdate(
-    id,
+export async function updateProductPrice(id, userId, price) {
+  const product = await Product.findOneAndUpdate(
+    { _id: id, userId },
     { price },
     { new: true, runValidators: true }
   ).lean();
@@ -131,8 +134,8 @@ export async function updateProductPrice(id, price) {
   return formatProduct(product);
 }
 
-export async function deleteProduct(id) {
-  const product = await Product.findByIdAndDelete(id);
+export async function deleteProduct(id, userId) {
+  const product = await Product.findOneAndDelete({ _id: id, userId });
   if (!product)
     throw new ErrorHandler("Product not found", HTTP_STATUS.NOT_FOUND);
   await InventoryEntry.deleteMany({ productId: id });

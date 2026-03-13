@@ -4,13 +4,16 @@ import { success } from "../utils/response.js";
 import { HTTP_STATUS } from "../config/constants.js";
 
 export const getInventory = catchAsyncErrors(async (req, res) => {
-  const result = await inventoryService.listInventoryWithProducts(req.query);
+  const userId = req.user?.id;
+  const result = await inventoryService.listInventoryWithProducts(userId, req.query);
   return success(res, HTTP_STATUS.OK, "Success", result);
 });
 
 export const createOrUpdateInventory = catchAsyncErrors(async (req, res) => {
+  const userId = req.user?.id;
   const { productId, fillLevel } = req.body;
   const result = await inventoryService.createOrUpdateFillLevel(
+    userId,
     productId,
     fillLevel
   );
@@ -18,7 +21,8 @@ export const createOrUpdateInventory = catchAsyncErrors(async (req, res) => {
 });
 
 export const getInventoryReport = catchAsyncErrors(async (req, res) => {
-  const report = await inventoryService.getReport(req.query);
+  const userId = req.user?.id;
+  const report = await inventoryService.getReport(userId, req.query);
   const format = (req.query.format || "json").toLowerCase();
 
   if (format === "excel" && report.products) {

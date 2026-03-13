@@ -41,8 +41,9 @@ export const validate = (schemaOrSchemas) => {
             field: d.path.join("."),
             message: d.message,
           })) || [];
+        const firstMsg = errors[0]?.message || "Validation failed";
         return next(
-          new ErrorHandler("Validation failed", HTTP_STATUS.BAD_REQUEST, errors)
+          new ErrorHandler(firstMsg, HTTP_STATUS.BAD_REQUEST, errors)
         );
       }
       next(err);

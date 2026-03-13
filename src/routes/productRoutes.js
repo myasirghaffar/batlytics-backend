@@ -26,7 +26,7 @@ import config from "../config/index.js";
 const router = express.Router();
 const useAuth = config.allowUnauthenticated ? optionalAuth : isAuthenticatedUser;
 const useAuthRole = (...roles) =>
-  config.allowUnauthenticated ? optionalAuth : authorizeRole(...roles);
+  config.allowUnauthenticated ? optionalAuth : [isAuthenticatedUser, authorizeRole(...roles)];
 
 router.get("/", useAuth, validate({ query: listProductsQuerySchema }), getProducts);
 router.get(
@@ -36,8 +36,8 @@ router.get(
   searchProducts
 );
 router.get("/:id", useAuth, validate({ params: productIdParamSchema }), getProductById);
-router.post("/", useAuthRole(USER_ROLES.ADMIN, USER_ROLES.STAFF), validate(createProductSchema), createProduct);
-router.put("/:id", useAuthRole(USER_ROLES.ADMIN, USER_ROLES.STAFF), validate({ params: productIdParamSchema, body: updateProductSchema }), updateProduct);
+router.post("/", useAuthRole(USER_ROLES.ADMIN, USER_ROLES.STAFF, USER_ROLES.USER), validate(createProductSchema), createProduct);
+router.put("/:id", useAuthRole(USER_ROLES.ADMIN, USER_ROLES.STAFF, USER_ROLES.USER), validate({ params: productIdParamSchema, body: updateProductSchema }), updateProduct);
 router.patch(
   "/:id/fillLevel",
   useAuth,
@@ -50,6 +50,6 @@ router.patch(
   validate({ params: productIdParamSchema, body: priceSchema }),
   updateProductPrice
 );
-router.delete("/:id", useAuthRole(USER_ROLES.ADMIN), validate({ params: productIdParamSchema }), deleteProduct);
+router.delete("/:id", useAuthRole(USER_ROLES.ADMIN, USER_ROLES.USER), validate({ params: productIdParamSchema }), deleteProduct);
 
 export default router;

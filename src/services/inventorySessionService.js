@@ -29,9 +29,9 @@ function formatItem(i) {
   };
 }
 
-export async function listSessions(query = {}) {
+export async function listSessions(userId, query = {}) {
   const limit = Math.min(parseInt(query.limit, 10) || 50, 100);
-  const filter = {};
+  const filter = { userId };
   if (query.areaId) filter.areaId = query.areaId;
 
   const sessions = await InventorySession.find(filter)
@@ -49,8 +49,8 @@ export async function listSessions(query = {}) {
   }));
 }
 
-export async function getSessionById(id) {
-  const session = await InventorySession.findById(id)
+export async function getSessionById(id, userId) {
+  const session = await InventorySession.findOne({ _id: id, userId })
     .populate("areaId", "name")
     .lean();
   if (!session)
@@ -85,12 +85,13 @@ export async function getSessionById(id) {
   };
 }
 
-export async function createSession(payload) {
-  const area = await Area.findById(payload.areaId);
+export async function createSession(userId, payload) {
+  const area = await Area.findOne({ _id: payload.areaId, userId });
   if (!area)
     throw new ErrorHandler("Area not found", HTTP_STATUS.NOT_FOUND);
 
   const session = await InventorySession.create({
+    userId,
     areaId: payload.areaId,
     areaName: payload.areaName || area.name,
     date: payload.date || new Date().toISOString().split("T")[0],
@@ -100,8 +101,8 @@ export async function createSession(payload) {
   return formatSession(session);
 }
 
-export async function addSessionItems(sessionId, items) {
-  const session = await InventorySession.findById(sessionId);
+export async function addSessionItems(sessionId, userId, items) {
+  const session = await InventorySession.findOne({ _id: sessionId, userId });
   if (!session)
     throw new ErrorHandler("Session not found", HTTP_STATUS.NOT_FOUND);
 
@@ -116,5 +117,5 @@ export async function addSessionItems(sessionId, items) {
     );
   }
 
-  return getSessionById(sessionId);
+  return getSessionById(sessionId, userId);
 }

@@ -4,17 +4,20 @@ import { success } from "../utils/response.js";
 import { HTTP_STATUS } from "../config/constants.js";
 
 export const getCategories = catchAsyncErrors(async (req, res) => {
-  const categories = await categoryService.listCategories();
+  const userId = req.user?.id;
+  const categories = await categoryService.listCategories(userId);
   return success(res, HTTP_STATUS.OK, "Success", categories);
 });
 
 export const getCategoryById = catchAsyncErrors(async (req, res) => {
-  const category = await categoryService.getCategoryById(req.params.id);
+  const userId = req.user?.id;
+  const category = await categoryService.getCategoryById(req.params.id, userId);
   return success(res, HTTP_STATUS.OK, "Success", category);
 });
 
 export const createCategory = catchAsyncErrors(async (req, res) => {
-  const category = await categoryService.createCategory(req.body);
+  const userId = req.user?.id;
+  const category = await categoryService.createCategory(userId, req.body);
   return success(
     res,
     HTTP_STATUS.CREATED,
@@ -24,8 +27,10 @@ export const createCategory = catchAsyncErrors(async (req, res) => {
 });
 
 export const updateCategory = catchAsyncErrors(async (req, res) => {
+  const userId = req.user?.id;
   const category = await categoryService.updateCategory(
     req.params.id,
+    userId,
     req.body
   );
   return success(
@@ -37,6 +42,7 @@ export const updateCategory = catchAsyncErrors(async (req, res) => {
 });
 
 export const deleteCategory = catchAsyncErrors(async (req, res) => {
-  await categoryService.deleteCategory(req.params.id);
+  const userId = req.user?.id;
+  await categoryService.deleteCategory(req.params.id, userId);
   return success(res, HTTP_STATUS.OK, "Category deleted successfully");
 });

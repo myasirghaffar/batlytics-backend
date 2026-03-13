@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const inventoryEntrySchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
@@ -19,6 +24,7 @@ const inventoryEntrySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+inventoryEntrySchema.index({ userId: 1 });
 inventoryEntrySchema.index({ productId: 1 });
 inventoryEntrySchema.index({ lastUpdated: -1 });
 

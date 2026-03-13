@@ -1,5 +1,7 @@
 import catchAsyncErrors from "../middlewares/catchAsyncErrors.js";
 import * as authService from "../services/authService.js";
+import * as areaService from "../services/areaService.js";
+import { USER_ROLES } from "../config/constants.js";
 import {
   sendEmail,
   getPasswordResetTemplatePath,
@@ -16,7 +18,9 @@ export const me = catchAsyncErrors(async (req, res) => {
 });
 
 export const createUser = catchAsyncErrors(async (req, res, next) => {
-  const user = await authService.createUser(req.body);
+  const payload = { ...req.body, role: USER_ROLES.ADMIN };
+  const user = await authService.createUser(payload);
+  await areaService.createArea(user.id, { name: "Cocktailstation" });
   return success(res, HTTP_STATUS.CREATED, "User created successfully", user);
 });
 

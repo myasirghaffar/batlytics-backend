@@ -15,9 +15,16 @@ export const searchProductsQuerySchema = Joi.object({
   areaId: objectId.optional(),
 });
 
+const toNum = (v, def) => {
+  if (v == null || v === "") return def;
+  const n = Number(v);
+  return isNaN(n) ? def : n;
+};
+
 export const createProductSchema = Joi.object({
   areaId: objectId.required().messages({
-    "string.pattern.base": "Invalid area ID",
+    "string.pattern.base": "Invalid area ID - select an area first",
+    "any.required": "Area is required",
   }),
   name: Joi.string().trim().min(1).required().messages({
     "string.min": "Product name cannot be empty",
@@ -26,10 +33,10 @@ export const createProductSchema = Joi.object({
   category: Joi.string().allow("").optional(),
   image: Joi.string().allow("").optional(),
   imageURL: Joi.string().allow("").optional(),
-  volume: Joi.number().min(0).optional(),
-  unitSize: Joi.number().min(0).optional(),
-  price: Joi.number().min(0).optional(),
-  fillLevel: Joi.number().min(0).max(100).optional(),
+  volume: Joi.any().optional().custom((v) => toNum(v, 0)),
+  unitSize: Joi.any().optional().custom((v) => toNum(v, 0)),
+  price: Joi.any().optional().custom((v) => toNum(v, 0)),
+  fillLevel: Joi.any().optional().custom((v) => Math.min(100, Math.max(0, toNum(v, 100)))),
 });
 
 export const updateProductSchema = Joi.object({

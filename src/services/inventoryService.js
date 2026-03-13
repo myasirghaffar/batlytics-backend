@@ -18,13 +18,13 @@ function mapEntryToItem(entry) {
   };
 }
 
-export async function listInventoryWithProducts(query = {}) {
+export async function listInventoryWithProducts(userId, query = {}) {
   const limit = parseLimit(query.limit);
   const cursorId = parseCursor(query.cursor);
-  const filter = {};
+  const filter = { userId };
 
   if (cursorId) {
-    const cursorEntry = await InventoryEntry.findById(cursorId).lean();
+    const cursorEntry = await InventoryEntry.findOne({ _id: cursorId, userId }).lean();
     if (cursorEntry) {
       filter.$or = [
         { lastUpdated: { $lt: cursorEntry.lastUpdated } },
@@ -50,14 +50,14 @@ export async function listInventoryWithProducts(query = {}) {
   return result;
 }
 
-export async function createOrUpdateFillLevel(productId, fillLevel) {
-  const product = await Product.findById(productId);
+export async function createOrUpdateFillLevel(userId, productId, fillLevel) {
+  const product = await Product.findOne({ _id: productId, userId });
   if (!product)
     throw new ErrorHandler("Product not found", HTTP_STATUS.NOT_FOUND);
 
   const entry = await InventoryEntry.findOneAndUpdate(
-    { productId },
-    { fillLevel, lastUpdated: new Date() },
+    { productId, userId },
+    { productId, userId, fillLevel, lastUpdated: new Date() },
     { new: true, upsert: true, runValidators: true }
   ).populate({
     path: "productId",
@@ -73,9 +73,9 @@ export async function createOrUpdateFillLevel(productId, fillLevel) {
   };
 }
 
-export async function getReport(query = {}) {
+export async function getReport(userId, query = {}) {
   const Product = (await import("../models/productModel.js")).default;
-  const filter = {};
+  const filter = { userId };
   if (query.areaId) filter.areaId = query.areaId;
 
   const products = await Product.find(filter).sort({ name: 1 }).lean();
