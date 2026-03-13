@@ -4,8 +4,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
+    "dev": "node init && nodemon src/index.js",
+    "start": "node init && node src/index.js",
     "pm2:start": "pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop inventory-management-api",
     "pm2:restart": "pm2 restart inventory-management-api",
@@ -13,7 +13,7 @@
     "pm2:monit": "pm2 monit",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "prepare": "husky"
+    "prepare": "husky 2>/dev/null || true"
   },
   "keywords": [],
   "author": "",
